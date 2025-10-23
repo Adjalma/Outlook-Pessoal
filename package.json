@@ -12,6 +12,7 @@
     "frontend": "cd frontend && npm run dev",
     "backend": "nodemon server.js",
     "build": "cd frontend && npm install && npm run build",
+    "migrate": "node scripts/migrate-to-postgres.js",
     "setup": "node setup.js",
     "test": "jest"
   },
