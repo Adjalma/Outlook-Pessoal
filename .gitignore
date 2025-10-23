@@ -1,0 +1,51 @@
+# Arquivos e diretórios ignorados pelo Git
+
+# Dependências
+node_modules/
+frontend/node_modules/
+
+# Arquivos de ambiente
+.env
+.env.local
+.env.production
+.env.development
+
+# Logs
+logs/
+*.log
+
+# Banco de dados
+data/
+*.db
+*.sqlite
+
+# Builds
+dist/
+build/
+frontend/dist/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporários
+tmp/
+temp/
+*.tmp
+
+# Uploads
+uploads/
+
+# Backup
+*.backup
+*.bak
