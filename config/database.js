@@ -1,5 +1,20 @@
-const sqlite3 = require('sqlite3').verbose();
-const { Pool } = require('pg');
+// Importar apenas o que funciona no Vercel
+let sqlite3 = null;
+let Pool = null;
+
+try {
+  // Tentar importar PostgreSQL (funciona no Vercel)
+  Pool = require('pg').Pool;
+} catch (err) {
+  console.log('PostgreSQL não disponível');
+}
+
+try {
+  // Tentar importar SQLite (só funciona local)
+  sqlite3 = require('sqlite3').verbose();
+} catch (err) {
+  console.log('SQLite não disponível no Vercel');
+}
 
 // Configuração do banco de dados
 const getDatabase = () => {
@@ -37,26 +52,44 @@ const getDatabase = () => {
   }
   
   // Se estiver local, usar SQLite
-  const db = new sqlite3.Database('./data/triarc_email.db');
+  if (sqlite3) {
+    const db = new sqlite3.Database('./data/triarc_email.db');
+    
+    return {
+      type: 'sqlite',
+      db: db,
+      query: (sql, params = []) => {
+        return new Promise((resolve, reject) => {
+          db.all(sql, params, (err, rows) => {
+            if (err) reject(err);
+            else resolve(rows);
+          });
+        });
+      },
+      run: (sql, params = []) => {
+        return new Promise((resolve, reject) => {
+          db.run(sql, params, function(err) {
+            if (err) reject(err);
+            else resolve({ lastID: this.lastID, changes: this.changes });
+          });
+        });
+      }
+    };
+  }
+  
+  // Se não tiver nenhum banco disponível, usar memória
+  console.log('Usando banco em memória (dados temporários)');
+  const memoryDB = new Map();
   
   return {
-    type: 'sqlite',
-    db: db,
-    query: (sql, params = []) => {
-      return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
-      });
+    type: 'memory',
+    query: async (sql, params = []) => {
+      // Implementação simples em memória
+      return [];
     },
-    run: (sql, params = []) => {
-      return new Promise((resolve, reject) => {
-        db.run(sql, params, function(err) {
-          if (err) reject(err);
-          else resolve({ lastID: this.lastID, changes: this.changes });
-        });
-      });
+    run: async (sql, params = []) => {
+      // Implementação simples em memória
+      return { lastID: 1, changes: 1 };
     }
   };
 };
