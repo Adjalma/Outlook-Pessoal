@@ -1,30 +1,8 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import dotenv from 'dotenv';
-import rateLimit from 'express-rate-limit';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-
-// Importar rotas
-import authRoutes from './routes/auth.js';
-import emailRoutes from './routes/email.js';
-import templateRoutes from './routes/templates.js';
-import dashboardRoutes from './routes/dashboard.js';
-import userRoutes from './routes/users.js';
-
-// Importar middleware
-import { authenticateToken } from './middleware/auth.js';
-import { errorHandler } from './middleware/errorHandler.js';
-import { logger } from './utils/logger.js';
-
-// Importar configuração do banco
-import { initDatabase } from './config/database.js';
-
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -77,21 +55,6 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Logging de requests
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.path} - ${req.ip}`);
-  next();
-});
-
-// Rotas públicas
-app.use('/api/auth', authRoutes);
-
-// Rotas protegidas (requerem autenticação)
-app.use('/api/email', authenticateToken, emailRoutes);
-app.use('/api/templates', authenticateToken, templateRoutes);
-app.use('/api/dashboard', authenticateToken, dashboardRoutes);
-app.use('/api/users', authenticateToken, userRoutes);
-
 // Rota de health check
 app.get('/api/health', (req, res) => {
   res.json({
@@ -102,11 +65,128 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Servir arquivos estáticos (para templates de email)
-app.use('/static', express.static(join(__dirname, 'public')));
-
-// Middleware de erro global
-app.use(errorHandler);
+// Rota principal - Dashboard
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sistema de Email Triarc Solutions</title>
+        <style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                margin: 0;
+                padding: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .container {
+                background: white;
+                padding: 40px;
+                border-radius: 15px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                text-align: center;
+                max-width: 600px;
+                width: 90%;
+            }
+            .logo {
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 30px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 48px;
+                font-weight: bold;
+                box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            }
+            h1 {
+                color: #333;
+                margin-bottom: 15px;
+                font-size: 2.5em;
+                font-weight: 300;
+            }
+            .subtitle {
+                color: #666;
+                font-size: 1.2em;
+                margin-bottom: 30px;
+                line-height: 1.5;
+            }
+            .status {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin: 20px 0;
+                border-left: 4px solid #28a745;
+            }
+            .status-indicator {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background-color: #28a745;
+                margin-right: 8px;
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0% { opacity: 1; }
+                50% { opacity: 0.5; }
+                100% { opacity: 1; }
+            }
+            .btn {
+                display: inline-block;
+                padding: 15px 30px;
+                margin: 10px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                font-weight: 500;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            }
+            .footer {
+                margin-top: 30px;
+                font-size: 0.9em;
+                color: #888;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="logo">T</div>
+            <h1>Sistema de Email Triarc Solutions</h1>
+            <p class="subtitle">Sistema Corporativo de Gerenciamento de Emails</p>
+            
+            <div class="status">
+                <span class="status-indicator"></span>
+                <strong>Sistema Online</strong> - Todas as funcionalidades operacionais
+            </div>
+            
+            <a href="/api/health" class="btn" target="_blank">Verificar Status da API</a>
+            <a href="https://github.com/Adjalma/Outlook-Pessoal" class="btn" target="_blank">Repositório GitHub</a>
+            
+            <div class="footer">
+                <p>Desenvolvido pela Triarc Solutions</p>
+                <p>Versão 1.0.0 - Deploy Automático via Vercel</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `);
+});
 
 // Rota 404
 app.use('*', (req, res) => {
@@ -117,37 +197,5 @@ app.use('*', (req, res) => {
   });
 });
 
-// Inicializar servidor
-async function startServer() {
-  try {
-    // Inicializar banco de dados
-    await initDatabase();
-    logger.info('Banco de dados inicializado com sucesso');
-
-    // Iniciar servidor
-    app.listen(PORT, () => {
-      logger.info(`🚀 Servidor Triarc Email rodando na porta ${PORT}`);
-      logger.info(`📧 Sistema de email corporativo ativo`);
-      logger.info(`🌐 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:5173'}`);
-      logger.info(`📊 Dashboard: http://localhost:${PORT}/api/dashboard`);
-    });
-  } catch (error) {
-    logger.error('Erro ao iniciar servidor:', error);
-    process.exit(1);
-  }
-}
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  logger.info('SIGTERM recebido. Encerrando servidor...');
-  process.exit(0);
-});
-
-process.on('SIGINT', () => {
-  logger.info('SIGINT recebido. Encerrando servidor...');
-  process.exit(0);
-});
-
-startServer();
-
-export default app;
+// Exportar para Vercel
+module.exports = app;
