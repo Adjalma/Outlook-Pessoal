@@ -5,38 +5,11 @@ const path = require('path');
 const AWS = require('aws-sdk');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
-// Importar dependências opcionais com try/catch
-let multer = null;
-let nodemailer = null;
-let Imap = null;
-let simpleParser = null;
-
-try {
-  multer = require('multer');
-} catch (err) {
-  console.log('Multer não disponível no Vercel');
-}
-
-try {
-  nodemailer = require('nodemailer');
-} catch (err) {
-  console.log('Nodemailer não disponível no Vercel');
-}
-
-try {
-  Imap = require('imap');
-} catch (err) {
-  console.log('Imap não disponível no Vercel');
-}
-
-try {
-  simpleParser = require('mailparser').simpleParser;
-} catch (err) {
-  console.log('Mailparser não disponível no Vercel');
-}
-
+const multer = require('multer');
 const { getDatabase, createTables } = require('./config/database');
+const nodemailer = require('nodemailer');
+const Imap = require('imap');
+const { simpleParser } = require('mailparser');
 const crypto = require('crypto');
 const fs = require('fs');
 
@@ -577,8 +550,8 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ error: 'Token inválido' });
     }
     req.user = user;
-  next();
-});
+    next();
+  });
 };
 
 // Configuração do multer para upload de arquivos
@@ -612,7 +585,7 @@ app.post('/api/auth/login', (req, res) => {
       { expiresIn: '24h' }
     );
 
-  res.json({
+    res.json({
       token,
       user: {
         id: user.id,

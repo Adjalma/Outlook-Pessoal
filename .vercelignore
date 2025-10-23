@@ -1,0 +1,17 @@
+# Ignorar dependências problemáticas no build do Vercel
+node_modules/sqlite3
+node_modules/imap
+node_modules/node-imap
+node_modules/multer
+node_modules/mailparser
+
+# Manter o sistema intacto
+!server.js
+!frontend/
+!config/
+!routes/
+!services/
+!middleware/
+!utils/
+!package.json
+!vercel.json
