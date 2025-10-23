@@ -1,197 +1,84 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Email Triarc Solutions</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            text-align: center;
-            max-width: 500px;
-        }
-        .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            background: #667eea;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .status {
-            background: #f0f8ff;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .status-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 10px 0;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .status-label {
-            font-weight: bold;
-            color: #333;
-        }
-        .status-value {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .error {
-            color: #dc3545;
-        }
-        .warning {
-            color: #ffc107;
-        }
-        .info {
-            color: #17a2b8;
-        }
-        .actions {
-            margin-top: 30px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            margin: 5px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        .btn:hover {
-            background: #5a6fd8;
-        }
-        .btn-secondary {
-            background: #6c757d;
-        }
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="logo">T</div>
-        <h1>Sistema de Email Triarc Solutions</h1>
-        <p class="subtitle">Sistema Corporativo de Gerenciamento de Emails</p>
-        
-        <div class="status">
-            <h3>Status do Sistema</h3>
-            <div class="status-item">
-                <span class="status-label">Backend API:</span>
-                <span class="status-value" id="api-status">Verificando...</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">AWS SES:</span>
-                <span class="status-value" id="ses-status">Verificando...</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Banco de Dados:</span>
-                <span class="status-value" id="db-status">Verificando...</span>
-            </div>
-        </div>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Email Corporativo - Triarc Solutions</title>
+    <meta name="description" content="Sistema completo de email corporativo com integração AWS SES e interface administrativa moderna." />
+    <meta name="keywords" content="email corporativo, AWS SES, Triarc Solutions, sistema de email" />
+    <meta name="author" content="Triarc Solutions" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://triarcsolutions.com.br" />
+    <meta property="og:title" content="Sistema de Email Corporativo - Triarc Solutions" />
+    <meta property="og:description" content="Sistema completo de email corporativo com integração AWS SES e interface administrativa moderna." />
+    <meta property="og:image" content="https://triarcsolutions.com.br/logo_Triarc.png" />
 
-        <div class="actions">
-            <a href="/api/health" class="btn" target="_blank">Health Check</a>
-            <a href="https://github.com/Adjalma/Outlook-Pessoal" class="btn btn-secondary" target="_blank">GitHub</a>
-        </div>
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://triarcsolutions.com.br" />
+    <meta property="twitter:title" content="Sistema de Email Corporativo - Triarc Solutions" />
+    <meta property="twitter:description" content="Sistema completo de email corporativo com integração AWS SES e interface administrativa moderna." />
+    <meta property="twitter:image" content="https://triarcsolutions.com.br/logo_Triarc.png" />
 
-        <div style="margin-top: 30px; font-size: 14px; color: #666;">
-            <p><strong>Versão:</strong> 1.0.0</p>
-            <p><strong>Ambiente:</strong> Produção</p>
-            <p><strong>Deploy:</strong> Vercel</p>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <!-- Theme -->
+    <meta name="theme-color" content="#0ea5e9" />
+    
+    <!-- Preload critical resources -->
+    
+    <link rel="preload" href="data:text/jsx;base64,aW1wb3J0IFJlYWN0IGZyb20gJ3JlYWN0JzsNCmltcG9ydCBSZWFjdERPTSBmcm9tICdyZWFjdC1kb20vY2xpZW50JzsNCmltcG9ydCB7IEJyb3dzZXJSb3V0ZXIgfSBmcm9tICdyZWFjdC1yb3V0ZXItZG9tJzsNCmltcG9ydCB7IFRvYXN0ZXIgfSBmcm9tICdyZWFjdC1ob3QtdG9hc3QnOw0KaW1wb3J0IEVtYWlsRGFzaGJvYXJkIGZyb20gJy4vQXBwLmpzeCc7DQppbXBvcnQgJy4vaW5kZXguY3NzJzsNCg0KUmVhY3RET00uY3JlYXRlUm9vdChkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgncm9vdCcpKS5yZW5kZXIoDQogIDxSZWFjdC5TdHJpY3RNb2RlPg0KICAgIDxCcm93c2VyUm91dGVyPg0KICAgICAgPEVtYWlsRGFzaGJvYXJkIC8+DQogICAgICA8VG9hc3Rlcg0KICAgICAgICBwb3NpdGlvbj0idG9wLXJpZ2h0Ig0KICAgICAgICB0b2FzdE9wdGlvbnM9e3sNCiAgICAgICAgICBkdXJhdGlvbjogNDAwMCwNCiAgICAgICAgICBzdHlsZTogew0KICAgICAgICAgICAgYmFja2dyb3VuZDogJyNmZmZmZmYnLA0KICAgICAgICAgICAgY29sb3I6ICcjMWYyOTM3JywNCiAgICAgICAgICAgIGJvcmRlcjogJzFweCBzb2xpZCAjMGVhNWU5JywNCiAgICAgICAgICAgIGJvcmRlclJhZGl1czogJzhweCcsDQogICAgICAgICAgICBib3hTaGFkb3c6ICcwIDEwcHggMTVweCAtM3B4IHJnYmEoMCwgMCwgMCwgMC4xKScsDQogICAgICAgICAgfSwNCiAgICAgICAgICBzdWNjZXNzOiB7DQogICAgICAgICAgICBpY29uVGhlbWU6IHsNCiAgICAgICAgICAgICAgcHJpbWFyeTogJyMyMmM1NWUnLA0KICAgICAgICAgICAgICBzZWNvbmRhcnk6ICcjZmZmZmZmJywNCiAgICAgICAgICAgIH0sDQogICAgICAgICAgfSwNCiAgICAgICAgICBlcnJvcjogew0KICAgICAgICAgICAgaWNvblRoZW1lOiB7DQogICAgICAgICAgICAgIHByaW1hcnk6ICcjZGMyNjI2JywNCiAgICAgICAgICAgICAgc2Vjb25kYXJ5OiAnI2ZmZmZmZicsDQogICAgICAgICAgICB9LA0KICAgICAgICAgIH0sDQogICAgICAgIH19DQogICAgICAvPg0KICAgIDwvQnJvd3NlclJvdXRlcj4NCiAgPC9SZWFjdC5TdHJpY3RNb2RlPiwNCik7DQo=" as="script">
+    <script type="module" crossorigin src="/assets/index-79903710.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-edb5163b.js">
+    <link rel="modulepreload" crossorigin href="/assets/router-91a251eb.js">
+    <link rel="modulepreload" crossorigin href="/assets/ui-c9599a2a.js">
+    <link rel="stylesheet" href="/assets/index-6af49df3.css">
+  </head>
+  <body>
+    <div id="root">
+      <!-- Loading screen -->
+      <div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 flex items-center justify-center">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900 mb-2">Triarc Email System</h1>
+          <p class="text-gray-600 mb-4">Carregando sistema...</p>
+          <div class="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
         </div>
+      </div>
     </div>
-
-    <script>
-        // Verificar status da API
-        async function checkAPIStatus() {
-            try {
-                const response = await fetch('/api/health');
-                if (response.ok) {
-                    document.getElementById('api-status').textContent = 'Online';
-                    document.getElementById('api-status').className = 'status-value';
-                } else {
-                    throw new Error('API não respondeu');
-                }
-            } catch (error) {
-                document.getElementById('api-status').textContent = 'Offline';
-                document.getElementById('api-status').className = 'error';
-            }
-        }
-
-        // Verificar status do SES
-        async function checkSESStatus() {
-            try {
-                const response = await fetch('/api/health');
-                if (response.ok) {
-                    document.getElementById('ses-status').textContent = 'Configurado';
-                    document.getElementById('ses-status').className = 'status-value';
-                } else {
-                    throw new Error('SES não configurado');
-                }
-            } catch (error) {
-                document.getElementById('ses-status').textContent = 'Não configurado';
-                document.getElementById('ses-status').className = 'warning';
-            }
-        }
-
-        // Verificar status do banco
-        async function checkDBStatus() {
-            try {
-                const response = await fetch('/api/health');
-                if (response.ok) {
-                    document.getElementById('db-status').textContent = 'Conectado';
-                    document.getElementById('db-status').className = 'status-value';
-                } else {
-                    throw new Error('Banco não conectado');
-                }
-            } catch (error) {
-                document.getElementById('db-status').textContent = 'Desconectado';
-                document.getElementById('db-status').className = 'error';
-            }
-        }
-
-        // Executar verificações
-        checkAPIStatus();
-        checkSESStatus();
-        checkDBStatus();
-
-        // Atualizar a cada 30 segundos
-        setInterval(() => {
-            checkAPIStatus();
-            checkSESStatus();
-            checkDBStatus();
-        }, 30000);
-    </script>
-</body>
+    
+    <!-- Error boundary fallback -->
+    <noscript>
+      <div class="min-h-screen bg-red-50 flex items-center justify-center">
+        <div class="text-center p-8">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+            </svg>
+          </div>
+          <h1 class="text-2xl font-bold text-red-900 mb-2">JavaScript Desabilitado</h1>
+          <p class="text-red-700 mb-4">Este sistema requer JavaScript para funcionar.</p>
+          <p class="text-red-600">Por favor, habilite JavaScript no seu navegador e recarregue a página.</p>
+        </div>
+      </div>
+    </noscript>
+    
+    
+  </body>
 </html>
