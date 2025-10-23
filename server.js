@@ -6,7 +6,7 @@ const AWS = require('aws-sdk');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const sqlite3 = require('sqlite3').verbose();
+const { getDatabase, createTables } = require('./config/database');
 const nodemailer = require('nodemailer');
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
@@ -56,7 +56,7 @@ const ses = new AWS.SES({
 });
 
 // Configuração do banco de dados
-const db = new sqlite3.Database('./database.sqlite');
+const database = getDatabase();
 
 // Inicializar banco de dados
 db.serialize(() => {
@@ -759,7 +759,7 @@ app.post('/api/drafts', authenticateToken, (req, res) => {
         return res.status(500).json({ error: 'Erro ao salvar rascunho' });
       }
 
-      res.json({
+  res.json({
         message: 'Rascunho salvo com sucesso',
         id: this.lastID
       });

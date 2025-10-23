@@ -1,209 +1,144 @@
-import sqlite3 from 'sqlite3';
-import path from 'path';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
-import { initAuthTables } from '../services/authService.js';
-import { initEmailTables } from '../services/emailService.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 
 // Configuração do banco de dados
-const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '../data/triarc_email.db');
-let db = null;
-
-export const initDatabase = async () => {
-  return new Promise((resolve, reject) => {
-    try {
-      // Criar diretório se não existir
-      const dbDir = path.dirname(dbPath);
-      if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true });
+const getDatabase = () => {
+  // Se estiver no Vercel, usar PostgreSQL
+  if (process.env.DATABASE_URL) {
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false
       }
-
-      // Conectar ao banco
-      db = new sqlite3.Database(dbPath, (err) => {
-        if (err) {
-          console.error('Erro ao conectar ao banco de dados:', err);
-          reject(err);
-          return;
+    });
+    
+    return {
+      type: 'postgres',
+      pool: pool,
+      query: async (sql, params = []) => {
+        const client = await pool.connect();
+        try {
+          const result = await client.query(sql, params);
+          return result.rows;
+        } finally {
+          client.release();
         }
-
-        console.log(`Banco de dados conectado: ${dbPath}`);
-        
-        // Inicializar tabelas
-        Promise.all([
-          initAuthTables(),
-          initEmailTables()
-        ]).then(() => {
-          console.log('Tabelas do banco de dados inicializadas');
-          resolve();
-        }).catch((error) => {
-          console.error('Erro ao inicializar tabelas:', error);
-          reject(error);
-        });
-      });
-
-    } catch (error) {
-      console.error('Erro ao inicializar banco de dados:', error);
-      reject(error);
-    }
-  });
-};
-
-export const getDb = () => {
-  if (!db) {
-    throw new Error('Banco de dados não inicializado');
+      },
+      run: async (sql, params = []) => {
+        const client = await pool.connect();
+        try {
+          const result = await client.query(sql, params);
+          return { lastID: result.insertId, changes: result.rowCount };
+        } finally {
+          client.release();
+        }
+      }
+    };
   }
-  return db;
-};
-
-export const closeDatabase = () => {
-  return new Promise((resolve, reject) => {
-    if (db) {
-      db.close((err) => {
-        if (err) {
-          console.error('Erro ao fechar banco de dados:', err);
-          reject(err);
-        } else {
-          console.log('Banco de dados fechado');
-          resolve();
-        }
-      });
-    } else {
-      resolve();
-    }
-  });
-};
-
-// Função para executar queries
-export const runQuery = (sql, params = []) => {
-  return new Promise((resolve, reject) => {
-    if (!db) {
-      reject(new Error('Banco de dados não inicializado'));
-      return;
-    }
-
-    db.run(sql, params, function(err) {
-      if (err) {
-        console.error('Erro ao executar query:', err);
-        reject(err);
-      } else {
-        resolve({ 
-          lastID: this.lastID, 
-          changes: this.changes 
+  
+  // Se estiver local, usar SQLite
+  const db = new sqlite3.Database('./data/triarc_email.db');
+  
+  return {
+    type: 'sqlite',
+    db: db,
+    query: (sql, params = []) => {
+      return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
         });
-      }
-    });
-  });
-};
-
-// Função para buscar um registro
-export const getQuery = (sql, params = []) => {
-  return new Promise((resolve, reject) => {
-    if (!db) {
-      reject(new Error('Banco de dados não inicializado'));
-      return;
-    }
-
-    db.get(sql, params, (err, row) => {
-      if (err) {
-        console.error('Erro ao buscar registro:', err);
-        reject(err);
-      } else {
-        resolve(row);
-      }
-    });
-  });
-};
-
-// Função para buscar múltiplos registros
-export const allQuery = (sql, params = []) => {
-  return new Promise((resolve, reject) => {
-    if (!db) {
-      reject(new Error('Banco de dados não inicializado'));
-      return;
-    }
-
-    db.all(sql, params, (err, rows) => {
-      if (err) {
-        console.error('Erro ao buscar registros:', err);
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
-};
-
-// Função para backup do banco
-export const backupDatabase = (backupPath) => {
-  return new Promise((resolve, reject) => {
-    if (!db) {
-      reject(new Error('Banco de dados não inicializado'));
-      return;
-    }
-
-    const fs = require('fs');
-    const source = fs.createReadStream(dbPath);
-    const dest = fs.createWriteStream(backupPath);
-
-    source.pipe(dest);
-
-    dest.on('finish', () => {
-      console.log(`Backup criado: ${backupPath}`);
-      resolve();
-    });
-
-    dest.on('error', (err) => {
-      console.error('Erro ao criar backup:', err);
-      reject(err);
-    });
-  });
-};
-
-// Função para limpeza de dados antigos
-export const cleanupOldData = (daysToKeep = 90) => {
-  return new Promise((resolve, reject) => {
-    if (!db) {
-      reject(new Error('Banco de dados não inicializado'));
-      return;
-    }
-
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysToKeep);
-
-    const queries = [
-      // Limpar sessões expiradas
-      `DELETE FROM sessions WHERE expires_at < datetime('now')`,
-      
-      // Limpar tentativas de login antigas
-      `DELETE FROM login_attempts WHERE created_at < datetime('now', '-${daysToKeep} days')`,
-      
-      // Limpar emails antigos (manter apenas os últimos X dias)
-      `DELETE FROM sent_emails WHERE created_at < datetime('now', '-${daysToKeep} days')`
-    ];
-
-    Promise.all(queries.map(sql => runQuery(sql)))
-      .then(() => {
-        console.log(`Limpeza de dados antigos concluída (${daysToKeep} dias)`);
-        resolve();
-      })
-      .catch((error) => {
-        console.error('Erro na limpeza de dados:', error);
-        reject(error);
       });
-  });
+    },
+    run: (sql, params = []) => {
+      return new Promise((resolve, reject) => {
+        db.run(sql, params, function(err) {
+          if (err) reject(err);
+          else resolve({ lastID: this.lastID, changes: this.changes });
+        });
+      });
+    }
+  };
 };
 
-export default {
-  initDatabase,
-  getDb,
-  closeDatabase,
-  runQuery,
-  getQuery,
-  allQuery,
-  backupDatabase,
-  cleanupOldData
+// Função para criar tabelas
+const createTables = async (database) => {
+  if (database.type === 'postgres') {
+    // Criar tabelas PostgreSQL
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'user',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS emails (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES users(id),
+        to_email VARCHAR(255) NOT NULL,
+        subject TEXT NOT NULL,
+        body TEXT NOT NULL,
+        status VARCHAR(50) DEFAULT 'pending',
+        sent_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS templates (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        subject TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  } else {
+    // Criar tabelas SQLite
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        name TEXT NOT NULL,
+        role TEXT DEFAULT 'user',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS emails (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER REFERENCES users(id),
+        to_email TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        body TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        sent_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    
+    await database.query(`
+      CREATE TABLE IF NOT EXISTS templates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        subject TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+  }
+};
+
+module.exports = {
+  getDatabase,
+  createTables
 };
