@@ -1,10 +1,7 @@
-import express from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
-import dotenv from 'dotenv';
-import rateLimit from 'express-rate-limit';
-
-dotenv.config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
@@ -67,4 +64,4 @@ app.get('/', (req, res) => {
 });
 
 // Exportar para Vercel
-export default app;
+module.exports = app;
