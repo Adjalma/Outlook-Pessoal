@@ -4,8 +4,12 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import axios from 'axios';
 
-// Configurar axios
-axios.defaults.baseURL = 'http://localhost:5000/api';
+// Configurar axios para produção
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? window.location.origin + '/api'
+  : 'http://localhost:5000/api';
+
+axios.defaults.baseURL = API_BASE_URL;
 
 const EmailDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
